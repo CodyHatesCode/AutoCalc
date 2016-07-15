@@ -64,8 +64,10 @@ namespace AutoCalc
 
         private void UpdateSolution(object sender, TextChangedEventArgs e)
         {
+            string inputText = formulaBox.Text.Trim();
+
             // Check if the box is empty before indicating the error
-            if (formulaBox.Text.Trim() == string.Empty)
+            if (inputText == string.Empty)
             {
                 resultLabel.Content = string.Empty;
             }
@@ -76,16 +78,41 @@ namespace AutoCalc
                 NCalc.Expression expr = null;
                 decimal result = 0;
 
+                // attempt to parse hexadecimal numbers
+                try
+                {
+                    // split by 0x to get just the base16 number
+                    string[] hex = inputText.Split(new string[] { "0x" }, StringSplitOptions.RemoveEmptyEntries);
+                    for(int i = 0; i < hex.Length; i++)
+                    {
+                        // strip off everything past the next space/operator
+                        string chunk = hex[i].Split(new char[] { ' ', '+', '*', '/', '(', ')' })[0];
+
+                        // replace the hex numbers with base-10 numbers
+                        int actualNum = Convert.ToInt32(chunk, 16);
+
+                        hex[i] = hex[i].Replace(chunk, actualNum.ToString());
+                    }
+                    
+                    // reassemble the input string
+                    inputText = string.Concat(hex);
+                }
+                catch(Exception)
+                {
+                    error = true;
+                }
+
                 try
                 {
                     // attempt to evaluate the expression in the box
-                    expr = new NCalc.Expression(formulaBox.Text);
+                    expr = new NCalc.Expression(inputText);
                     result = Convert.ToDecimal(expr.Evaluate());
                 }
                 catch (Exception)
                 {
                     error = true;
                 }
+                
 
                 if (error)
                 {
