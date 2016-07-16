@@ -21,11 +21,14 @@ namespace AutoCalc
     /// </summary>
     public partial class MainWindow : Window
     {
+        bool hexOutput;
         DispatcherTimer infoTextTimer;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            hexOutput = false;
 
             // initialize the text boxes
             formulaBox.Text = string.Empty;
@@ -59,6 +62,12 @@ namespace AutoCalc
                     UpdateSolution(this, null);
                     ResetInfoText(this, null);
                     break;
+                // Ctrl - Toggle hex output
+                case Key.LeftShift:
+                case Key.RightShift:
+                    hexOutput = !hexOutput;
+                    UpdateSolution(this, null);
+                    break;
             }
         }
 
@@ -83,19 +92,22 @@ namespace AutoCalc
                 {
                     // split by 0x to get just the base16 number
                     string[] hex = inputText.Split(new string[] { "0x" }, StringSplitOptions.RemoveEmptyEntries);
-                    for(int i = 0; i < hex.Length; i++)
+                    if (inputText.Contains("0x"))
                     {
-                        // strip off everything past the next space/operator
-                        string chunk = hex[i].Split(new char[] { ' ', '+', '*', '/', '(', ')' })[0];
+                        for (int i = 0; i < hex.Length; i++)
+                        {
+                            // strip off everything past the next space/operator
+                            string chunk = hex[i].Split(new char[] { ' ', '+', '*', '/', '(', ')' })[0];
 
-                        // replace the hex numbers with base-10 numbers
-                        int actualNum = Convert.ToInt32(chunk, 16);
+                            // replace the hex numbers with base-10 numbers
+                            int actualNum = Convert.ToInt32(chunk, 16);
 
-                        hex[i] = hex[i].Replace(chunk, actualNum.ToString());
+                            hex[i] = hex[i].Replace(chunk, actualNum.ToString());
+                        }
+
+                        // reassemble the input string
+                        inputText = string.Concat(hex);
                     }
-                    
-                    // reassemble the input string
-                    inputText = string.Concat(hex);
                 }
                 catch(Exception)
                 {
@@ -122,7 +134,25 @@ namespace AutoCalc
                 else
                 {
                     resultLabel.Foreground = new SolidColorBrush(Color.FromRgb(90, 158, 34));
-                    resultLabel.Content = result;
+
+                    // defaults to non-hex output
+                    if(!hexOutput)
+                    {
+                        resultLabel.Content = result;
+                    }
+                    else
+                    {
+                        // convert the result to a string with the 0x identifier
+                        string hexResult = string.Format("0x{0:X}", Convert.ToInt32(result));
+                        resultLabel.Content = hexResult;
+
+                        // decimals are automatically rounded during conversion - notify the user
+                        if(result.ToString().Contains("."))
+                        {
+                            infoLabel.Content = "Decimals have been rounded off.";
+                            infoTextTimer.Start();
+                        }
+                    }
 
 
                     // attempt to read/display the result as a bool (logical operators)
