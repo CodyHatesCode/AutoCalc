@@ -62,9 +62,9 @@ namespace AutoCalc
                     UpdateSolution(this, null);
                     ResetInfoText(this, null);
                     break;
-                // Ctrl - Toggle hex output
-                case Key.LeftShift:
-                case Key.RightShift:
+                // End - Toggle hex output
+                case Key.End:
+                case Key.Home:
                     hexOutput = !hexOutput;
                     UpdateSolution(this, null);
                     break;
@@ -113,6 +113,10 @@ namespace AutoCalc
                 {
                     error = true;
                 }
+
+                // allow usage of "x" or "X" in place of "*" for multiplication
+                // todo: hex recognition interferes with lowercase x
+                inputText = inputText.Replace('x', '*').Replace('X', '*');
 
                 try
                 {
