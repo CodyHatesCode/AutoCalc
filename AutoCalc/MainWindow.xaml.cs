@@ -62,11 +62,14 @@ namespace AutoCalc
                     UpdateSolution(this, null);
                     ResetInfoText(this, null);
                     break;
-                // End - Toggle hex output
-                case Key.End:
-                case Key.Home:
-                    hexOutput = !hexOutput;
-                    UpdateSolution(this, null);
+                // Ctrl+Shift - Toggle hex output
+                case Key.LeftCtrl:
+                case Key.RightCtrl:
+                    if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+                    {
+                        hexOutput = !hexOutput;
+                        UpdateSolution(this, null);
+                    }
                     break;
             }
         }
@@ -91,16 +94,39 @@ namespace AutoCalc
                 try
                 {
                     // split by 0x to get just the base16 number
-                    string[] hex = inputText.Split(new string[] { "0x" }, StringSplitOptions.RemoveEmptyEntries);
-                    if (inputText.Contains("0x"))
+
+                    char[] operators = new char[] { ' ', '+', '-', '*', '/', '(', ')', 'x', 'X' };
+                    string[] delimiters = new string[operators.Length];
+
+                    for(int i = 0; i < operators.Length; i++) { delimiters[i] = operators[i] + "0x"; }
+
+                    if(inputText.StartsWith("0x") || delimiters.Any(d => inputText.Contains(d)))
                     {
+                        string[] hex = inputText.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+
                         for (int i = 0; i < hex.Length; i++)
                         {
+                            if(i == 0 && !inputText.StartsWith("0x"))
+                            {
+                                continue;
+                            }
+                            else if(i == 0 && inputText.StartsWith("0x"))
+                            {
+                                hex[0] = hex[0].Replace("0x", "");
+                            }
+
                             // strip off everything past the next space/operator
-                            string chunk = hex[i].Split(new char[] { ' ', '+', '*', '/', '(', ')' })[0];
+                            string chunk = hex[i].Split(operators)[0];
+                            /*
+
+                            {
+                                char[] operatorsWithoutX = operators.Take(7).ToArray();
+                                chunk = hex[i].Split(operatorsWithoutX)[0];
+                            }*/
 
                             // replace the hex numbers with base-10 numbers
                             int actualNum = Convert.ToInt32(chunk, 16);
+
 
                             hex[i] = hex[i].Replace(chunk, actualNum.ToString());
                         }
@@ -109,7 +135,7 @@ namespace AutoCalc
                         inputText = string.Concat(hex);
                     }
                 }
-                catch(Exception)
+                catch(Exception ex)
                 {
                     error = true;
                 }
