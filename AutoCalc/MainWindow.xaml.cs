@@ -93,13 +93,42 @@ namespace AutoCalc
                 // attempt to parse hexadecimal numbers
                 try
                 {
-                    // split by 0x to get just the base16 number
+                    // split by H to get just the base16 number
 
                     char[] operators = new char[] { ' ', '+', '-', '*', '/', '(', ')', 'x', 'X' };
                     string[] delimiters = new string[operators.Length];
 
-                    for(int i = 0; i < operators.Length; i++) { delimiters[i] = operators[i] + "0x"; }
+                    for(int i = 0; i < operators.Length; i++) { delimiters[i] = operators[i] + "H"; }
 
+                    if(inputText.ToUpper().Contains("H"))
+                    {
+                        string[] hex = inputText.ToUpper().Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+
+                        for(int i = 0; i < hex.Length; i++)
+                        {
+                            if(i == 0 && !inputText.ToUpper().StartsWith("H"))
+                            {
+                                continue;
+                            }
+                            else if(i == 0 && inputText.ToUpper().StartsWith("H"))
+                            {
+                                hex[i] = hex[i].Replace("H", string.Empty);
+                            }
+
+                            // strip off everything past the next space/operator
+                            string chunk = hex[i].Split(operators)[0];
+
+                            // replace the hex numbers with base-10 numbers
+                            int actualNum = Convert.ToInt32(chunk, 16);
+
+                            hex[i] = hex[i].Replace(chunk, actualNum.ToString());
+                        }
+
+                        // reassemble the input string
+                        inputText = string.Concat(hex);
+                    }
+
+                    /*
                     if(inputText.StartsWith("0x") || delimiters.Any(d => inputText.Contains(d)))
                     {
                         string[] hex = inputText.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
@@ -122,10 +151,9 @@ namespace AutoCalc
                             {
                                 char[] operatorsWithoutX = operators.Take(7).ToArray();
                                 chunk = hex[i].Split(operatorsWithoutX)[0];
-                            }*/
+                            }
 
-                            // replace the hex numbers with base-10 numbers
-                            int actualNum = Convert.ToInt32(chunk, 16);
+                            
 
 
                             hex[i] = hex[i].Replace(chunk, actualNum.ToString());
@@ -133,7 +161,7 @@ namespace AutoCalc
 
                         // reassemble the input string
                         inputText = string.Concat(hex);
-                    }
+                    }*/
                 }
                 catch(Exception ex)
                 {
