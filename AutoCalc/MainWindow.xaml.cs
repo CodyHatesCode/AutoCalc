@@ -128,6 +128,39 @@ namespace AutoCalc
                         inputText = string.Concat(hex);
                     }
 
+                    // split by Z to get just base2 numbers
+
+                    delimiters = new string[operators.Length];
+                    for(int i = 0; i < operators.Length; i++) { delimiters[i] = operators[i] + "Z"; }
+
+                    if(inputText.ToUpper().Contains("Z"))
+                    {
+                        string[] binary = inputText.ToUpper().Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+
+                        for(int i = 0; i < binary.Length; i++)
+                        {
+                            if(i == 0 && !inputText.ToUpper().StartsWith("Z"))
+                            {
+                                continue;
+                            }
+                            else if(i == 0 && inputText.ToUpper().StartsWith("Z"))
+                            {
+                                binary[i] = binary[i].Replace("Z", string.Empty);
+                            }
+
+                            // strip off everything past the next space/operator
+                            string chunk = binary[i].Split(operators)[0];
+
+                            // replace binary numbers with base10 numbers
+                            int actualNum = Convert.ToInt32(chunk, 2);
+
+                            binary[i] = binary[i].Replace(chunk, actualNum.ToString());
+                        }
+
+                        // reassemble
+                        inputText = string.Concat(binary);
+                    }
+
                     /*
                     if(inputText.StartsWith("0x") || delimiters.Any(d => inputText.Contains(d)))
                     {
