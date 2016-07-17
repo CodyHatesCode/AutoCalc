@@ -21,14 +21,14 @@ namespace AutoCalc
     /// </summary>
     public partial class MainWindow : Window
     {
-        bool hexOutput;
+        OutputMode outputMode;
         DispatcherTimer infoTextTimer;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            hexOutput = false;
+            outputMode = OutputMode.Decimal;
 
             // initialize the text boxes
             formulaBox.Text = string.Empty;
@@ -63,11 +63,11 @@ namespace AutoCalc
                     ResetInfoText(this, null);
                     break;
                 // Ctrl+Shift - Toggle hex output
-                case Key.LeftCtrl:
-                case Key.RightCtrl:
-                    if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+                case Key.LeftShift:
+                case Key.RightShift:
+                    if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
                     {
-                        hexOutput = !hexOutput;
+                        CycleOutputModes();
                         UpdateSolution(this, null);
                     }
                     break;
@@ -160,43 +160,8 @@ namespace AutoCalc
                         // reassemble
                         inputText = string.Concat(binary);
                     }
-
-                    /*
-                    if(inputText.StartsWith("0x") || delimiters.Any(d => inputText.Contains(d)))
-                    {
-                        string[] hex = inputText.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
-
-                        for (int i = 0; i < hex.Length; i++)
-                        {
-                            if(i == 0 && !inputText.StartsWith("0x"))
-                            {
-                                continue;
-                            }
-                            else if(i == 0 && inputText.StartsWith("0x"))
-                            {
-                                hex[0] = hex[0].Replace("0x", "");
-                            }
-
-                            // strip off everything past the next space/operator
-                            string chunk = hex[i].Split(operators)[0];
-                            /*
-
-                            {
-                                char[] operatorsWithoutX = operators.Take(7).ToArray();
-                                chunk = hex[i].Split(operatorsWithoutX)[0];
-                            }
-
-                            
-
-
-                            hex[i] = hex[i].Replace(chunk, actualNum.ToString());
-                        }
-
-                        // reassemble the input string
-                        inputText = string.Concat(hex);
-                    }*/
                 }
-                catch(Exception ex)
+                catch(Exception)
                 {
                     error = true;
                 }
@@ -227,24 +192,31 @@ namespace AutoCalc
                     resultLabel.Foreground = new SolidColorBrush(Color.FromRgb(90, 158, 34));
 
                     // defaults to non-hex output
-                    if(!hexOutput)
+                    switch(outputMode)
                     {
-                        resultLabel.Content = result;
+                        case OutputMode.Decimal:
+                            resultLabel.Content = result;
+                            break;
+                        case OutputMode.Hexadecimal:
+                            // convert the result to a string with the 0x identifier
+                            string hexResult = string.Format("0x{0:X}", Convert.ToInt32(result));
+                            resultLabel.Content = hexResult;
+                            break;
+                        case OutputMode.Binary:
+                            string binaryResult = string.Format("0b{0}", Convert.ToString((short)result, 2));
+                            resultLabel.Content = binaryResult;
+                            break;
                     }
-                    else
-                    {
-                        // convert the result to a string with the 0x identifier
-                        string hexResult = string.Format("0x{0:X}", Convert.ToInt32(result));
-                        resultLabel.Content = hexResult;
 
+                    if(outputMode != OutputMode.Decimal)
+                    {
                         // decimals are automatically rounded during conversion - notify the user
-                        if(result.ToString().Contains("."))
+                        if (result.ToString().Contains("."))
                         {
                             infoLabel.Content = "Decimals have been rounded off.";
                             infoTextTimer.Start();
                         }
                     }
-
 
                     // attempt to read/display the result as a bool (logical operators)
                     bool boolResult;
@@ -262,6 +234,22 @@ namespace AutoCalc
         {
             infoTextTimer.Stop();
             infoLabel.Content = string.Empty;
+        }
+
+        private void CycleOutputModes()
+        {
+            switch(outputMode)
+            {
+                case OutputMode.Decimal:
+                    outputMode = OutputMode.Hexadecimal;
+                    break;
+                case OutputMode.Hexadecimal:
+                    outputMode = OutputMode.Binary;
+                    break;
+                case OutputMode.Binary:
+                    outputMode = OutputMode.Decimal;
+                    break;
+            }
         }
     }
 }
