@@ -94,72 +94,11 @@ namespace AutoCalc
                 try
                 {
                     // split by H to get just the base16 number
+                    inputText = Utility.ConvertTerms(inputText, "H", 16);
 
-                    char[] operators = new char[] { ' ', '+', '-', '*', '/', '(', ')', 'x', 'X' };
-                    string[] delimiters = new string[operators.Length];
+                    // split by Z to get just the base2 numbers
+                    inputText = Utility.ConvertTerms(inputText, "Z", 2);
 
-                    for(int i = 0; i < operators.Length; i++) { delimiters[i] = operators[i] + "H"; }
-
-                    if(inputText.ToUpper().Contains("H"))
-                    {
-                        string[] hex = inputText.ToUpper().Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
-
-                        for(int i = 0; i < hex.Length; i++)
-                        {
-                            if(i == 0 && !inputText.ToUpper().StartsWith("H"))
-                            {
-                                continue;
-                            }
-                            else if(i == 0 && inputText.ToUpper().StartsWith("H"))
-                            {
-                                hex[i] = hex[i].Replace("H", string.Empty);
-                            }
-
-                            // strip off everything past the next space/operator
-                            string chunk = hex[i].Split(operators)[0];
-
-                            // replace the hex numbers with base-10 numbers
-                            int actualNum = Convert.ToInt32(chunk, 16);
-
-                            hex[i] = hex[i].Replace(chunk, actualNum.ToString());
-                        }
-
-                        // reassemble the input string
-                        inputText = string.Concat(hex);
-                    }
-
-                    // split by Z to get just base2 numbers
-
-                    delimiters = new string[operators.Length];
-                    for(int i = 0; i < operators.Length; i++) { delimiters[i] = operators[i] + "Z"; }
-
-                    if(inputText.ToUpper().Contains("Z"))
-                    {
-                        string[] binary = inputText.ToUpper().Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
-
-                        for(int i = 0; i < binary.Length; i++)
-                        {
-                            if(i == 0 && !inputText.ToUpper().StartsWith("Z"))
-                            {
-                                continue;
-                            }
-                            else if(i == 0 && inputText.ToUpper().StartsWith("Z"))
-                            {
-                                binary[i] = binary[i].Replace("Z", string.Empty);
-                            }
-
-                            // strip off everything past the next space/operator
-                            string chunk = binary[i].Split(operators)[0];
-
-                            // replace binary numbers with base10 numbers
-                            int actualNum = Convert.ToInt32(chunk, 2);
-
-                            binary[i] = binary[i].Replace(chunk, actualNum.ToString());
-                        }
-
-                        // reassemble
-                        inputText = string.Concat(binary);
-                    }
                 }
                 catch(Exception)
                 {
