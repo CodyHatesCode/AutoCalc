@@ -62,7 +62,7 @@ namespace AutoCalc
                     UpdateSolution(this, null);
                     ResetInfoText(this, null);
                     break;
-                // Ctrl+Shift - Toggle hex output
+                // Ctrl+Shift - Toggle output modes
                 case Key.LeftShift:
                 case Key.RightShift:
                     if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
@@ -99,6 +99,9 @@ namespace AutoCalc
                     // split by Z to get just the base2 numbers
                     inputText = Utility.ConvertTerms(inputText, "Z", 2);
 
+                    // split by O to get just the base8 numbers
+                    inputText = Utility.ConvertTerms(inputText, "O", 8);
+
                 }
                 catch(Exception)
                 {
@@ -130,20 +133,26 @@ namespace AutoCalc
                 {
                     resultLabel.Foreground = new SolidColorBrush(Color.FromRgb(90, 158, 34));
 
+                    string convertedResult = string.Empty;
+
                     // defaults to non-hex output
-                    switch(outputMode)
+                    switch (outputMode)
                     {
                         case OutputMode.Decimal:
                             resultLabel.Content = result;
                             break;
                         case OutputMode.Hexadecimal:
                             // convert the result to a string with the 0x identifier
-                            string hexResult = string.Format("0x{0:X}", Convert.ToInt32(result));
-                            resultLabel.Content = hexResult;
+                            convertedResult = string.Format("0x{0:X}", Convert.ToInt32(result));
+                            resultLabel.Content = convertedResult;
                             break;
                         case OutputMode.Binary:
-                            string binaryResult = string.Format("0b{0}", Convert.ToString((short)result, 2));
-                            resultLabel.Content = binaryResult;
+                            convertedResult = string.Format("0b{0}", Convert.ToString((short)result, 2));
+                            resultLabel.Content = convertedResult;
+                            break;
+                        case OutputMode.Octal:
+                            convertedResult = string.Format("(O) {0}", Convert.ToString((short)result, 8));
+                            resultLabel.Content = convertedResult;
                             break;
                     }
 
@@ -181,14 +190,23 @@ namespace AutoCalc
             {
                 case OutputMode.Decimal:
                     outputMode = OutputMode.Hexadecimal;
+                    infoLabel.Content = "Output: Hexadecimal";
                     break;
                 case OutputMode.Hexadecimal:
                     outputMode = OutputMode.Binary;
+                    infoLabel.Content = "Output: Binary";
                     break;
                 case OutputMode.Binary:
+                    outputMode = OutputMode.Octal;
+                    infoLabel.Content = "Output: Octal";
+                    break;
+                case OutputMode.Octal:
                     outputMode = OutputMode.Decimal;
+                    infoLabel.Content = "Output: Decimal";
                     break;
             }
+
+            infoTextTimer.Start();
         }
     }
 }
