@@ -133,24 +133,26 @@ namespace AutoCalc
                 {
                     resultLabel.Foreground = new SolidColorBrush(Color.FromRgb(90, 158, 34));
 
+                    string convertedResult = string.Empty;
+
                     // defaults to non-hex output
-                    switch(outputMode)
+                    switch (outputMode)
                     {
                         case OutputMode.Decimal:
                             resultLabel.Content = result;
                             break;
                         case OutputMode.Hexadecimal:
                             // convert the result to a string with the 0x identifier
-                            string hexResult = string.Format("0x{0:X}", Convert.ToInt32(result));
-                            resultLabel.Content = hexResult;
+                            convertedResult = string.Format("0x{0:X}", Convert.ToInt32(result));
+                            resultLabel.Content = convertedResult;
                             break;
                         case OutputMode.Binary:
-                            string binaryResult = string.Format("0b{0}", Convert.ToString((short)result, 2));
-                            resultLabel.Content = binaryResult;
+                            convertedResult = string.Format("0b{0}", Convert.ToString((short)result, 2));
+                            resultLabel.Content = convertedResult;
                             break;
                         case OutputMode.Octal:
-                            string octalResult = string.Format("(O) {0}", Convert.ToString((short)result, 8));
-                            resultLabel.Content = octalResult;
+                            convertedResult = string.Format("(O) {0}", Convert.ToString((short)result, 8));
+                            resultLabel.Content = convertedResult;
                             break;
                     }
 
