@@ -99,6 +99,9 @@ namespace AutoCalc
                     // split by Z to get just the base2 numbers
                     inputText = Utility.ConvertTerms(inputText, "Z", 2);
 
+                    // split by O to get just the base8 numbers
+                    inputText = Utility.ConvertTerms(inputText, "O", 8);
+
                 }
                 catch(Exception)
                 {
@@ -145,6 +148,10 @@ namespace AutoCalc
                             string binaryResult = string.Format("0b{0}", Convert.ToString((short)result, 2));
                             resultLabel.Content = binaryResult;
                             break;
+                        case OutputMode.Octal:
+                            string octalResult = string.Format("(O) {0}", Convert.ToString((short)result, 8));
+                            resultLabel.Content = octalResult;
+                            break;
                     }
 
                     if(outputMode != OutputMode.Decimal)
@@ -188,6 +195,10 @@ namespace AutoCalc
                     infoLabel.Content = "Output: Binary";
                     break;
                 case OutputMode.Binary:
+                    outputMode = OutputMode.Octal;
+                    infoLabel.Content = "Output: Octal";
+                    break;
+                case OutputMode.Octal:
                     outputMode = OutputMode.Decimal;
                     infoLabel.Content = "Output: Decimal";
                     break;
