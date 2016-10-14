@@ -62,7 +62,7 @@ namespace AutoCalc
                     UpdateSolution(this, null);
                     ResetInfoText(this, null);
                     break;
-                // Ctrl+Shift - Toggle hex output
+                // Ctrl+Shift - Toggle output modes
                 case Key.LeftShift:
                 case Key.RightShift:
                     if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
@@ -181,14 +181,19 @@ namespace AutoCalc
             {
                 case OutputMode.Decimal:
                     outputMode = OutputMode.Hexadecimal;
+                    infoLabel.Content = "Output: Hexadecimal";
                     break;
                 case OutputMode.Hexadecimal:
                     outputMode = OutputMode.Binary;
+                    infoLabel.Content = "Output: Binary";
                     break;
                 case OutputMode.Binary:
                     outputMode = OutputMode.Decimal;
+                    infoLabel.Content = "Output: Decimal";
                     break;
             }
+
+            infoTextTimer.Start();
         }
     }
 }
