@@ -10,6 +10,7 @@ namespace AutoCalc
     {
         Decimal,
         Hexadecimal,
-        Binary
+        Binary,
+        Octal
     }
 }
